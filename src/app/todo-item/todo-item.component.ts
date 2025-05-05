@@ -7,26 +7,29 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-
-
 @Component({
   selector: 'app-todo-item',
-  imports: [NgClass, MatCheckboxModule, MatListModule, MatIconModule, MatButtonModule, MatCardModule],
+  imports: [
+    NgClass,
+    MatCheckboxModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
+    MatCardModule,
+  ],
   templateUrl: './todo-item.component.html',
-  styleUrl: './todo-item.component.scss'
+  styleUrl: './todo-item.component.scss',
 })
 export class TodoItemComponent {
   @Input() todo!: Todo;
   @Output() delete = new EventEmitter<String>();
   @Output() toggle = new EventEmitter<String>();
 
-  
   onDelete() {
-    this.delete.emit(this.todo.id)
+    this.delete.emit(this.todo.id);
   }
 
   onToggle() {
-    this.toggle.emit(this.todo.id)
+    this.toggle.emit(this.todo.id);
   }
-  
 }
