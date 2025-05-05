@@ -1,0 +1,50 @@
+<div class="todo-container">
+
+    <h2>Meine Todo Liste</h2>
+  
+    <!-- Input und Add-Button in einer Zeile -->
+    <div class="todo-input-row">
+      <mat-form-field appearance="outline" class="todo-input">
+        <mat-label>Create new Todo</mat-label>
+        <input matInput [formControl]="newTodoTitle" placeholder="Was möchtest du tun?">
+      </mat-form-field>
+  
+      <button mat-fab color="primary"
+              [disabled]="!newTodoTitle.valid || newTodoTitle.pristine"
+              (click)="addTodo()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <mat-card *ngIf="hasSelection" class="selection-actions">
+        <div class="selection-info">
+          {{ selectedTodos.length }} Todo(s) ausgewählt
+        </div>
+      
+        <div class="selection-buttons">
+          <button mat-stroked-button color="primary" (click)="markSelectedAsIncomplete()">
+            Als offen markieren
+          </button>
+          <button mat-stroked-button color="warn" (click)="deleteSelectedTodos()">
+            Ausgewählte löschen
+          </button>
+        </div>
+      </mat-card>
+      
+  
+    <!-- Wenn leer -->
+    <p class="emptytext" *ngIf="todos.length === 0">
+      Aktuell sind keine Todos vorhanden.
+    </p>
+  
+    <!-- Todo-Liste -->
+    <mat-list *ngIf="todos.length > 0" class="todo-list">
+      <app-todo-item
+        *ngFor="let todo of todos"
+        [todo]="todo"
+        (delete)="deleteTodo($event)"
+        (toggle)="toggleTodo($event)">
+      </app-todo-item>
+    </mat-list>
+  </div>
+  

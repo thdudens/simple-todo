@@ -1,0 +1,25 @@
+.todo-card {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .todo-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .todo-title {
+    flex: 1;
+    font-size: 16px;
+  }
+  
+  .completed {
+    text-decoration: line-through;
+    color: gray;
+  }
+  
+  ::ng-deep .mat-mdc-card-content {
+    margin-top: -15px;
+    margin-bottom: -15px;
+  }
