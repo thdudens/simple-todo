@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 env:
-  NODE_VERSION: '22.x'                # Set this to the node version to use
+  NODE_VERSION: '19.x'                # Set this to the node version to use
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
 
 jobs:
