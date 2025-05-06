@@ -11,7 +11,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: simple-todo-test   # Set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp'      # Set this to the path to your web app project, defaults to the repository root
+  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'      # Set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '19.x'                # Set this to the node version to use
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
 
