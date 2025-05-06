@@ -10,14 +10,21 @@ on:
     branches: [ "main" ]
 
 env:
+  AZURE_WEBAPP_NAME: simple-todo-test   # Set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: 'src'      # Set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '19.x'                # Set this to the node version to use
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}        
+    
     - name: Use Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v4
       with:
@@ -26,3 +33,14 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test --no-watch --no-progress --browsers=ChromeHeadless
+
+     # Deploy web app using Azure credentials
+    - uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    # Azure logout 
+    - name: logout
+      run: |
+        az logout
