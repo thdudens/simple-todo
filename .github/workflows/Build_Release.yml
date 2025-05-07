@@ -1,0 +1,45 @@
+
+name: Build and deploy to staging/production
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:  
+  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'      # Set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '19.x'                # Set this to the node version to use
+  CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
+
+jobs:
+  build-app:
+    uses: ./.github/workflows/build.yml
+    with:
+      node-version: '19.x'
+      build-folder: 'dist/todoapp/browser'
+      artifact-name: 'todo-app'
+
+  deploy-staging:
+    uses: ./.github/workflows/deploy_azure.yml
+    needs: [deploy-test]    
+    with:
+      artifact-name: 'app'
+      web-app-name: 'simple-todo'
+      slot-name: 'stage'
+      environment-name: 'Staging'
+    secrets: inherit
+
+  release-to-prod:
+    name: Release to prod
+    needs: deploy-stage
+    runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+      url: 'https://${{ env.WEBAPP_NAME }}.azurewebsites.net/'
+
+    steps:    
+    - uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Swap slots
+      run: az webapp deployment slot swap -s stage -n simple-todo -g ASE-2
