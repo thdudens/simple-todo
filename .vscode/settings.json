@@ -1,0 +1,8 @@
+{
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": [
+            "file:///o%3A/ZHAW/ASE2/simple_todo/.github/workflows/deploy_azure.yml",
+            "file:///o%3A/ZHAW/ASE2/simple_todo/.github/workflows/node.js.yml"
+        ]
+    }
+}

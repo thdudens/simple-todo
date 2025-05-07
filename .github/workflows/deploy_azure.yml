@@ -1,0 +1,37 @@
+name: deploy to azure app service
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        required: true
+        type: string
+      web-app-name: 
+        required: true
+        type: string
+      slot-name:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest    
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          # Destination path. Supports basic tilde expansion.
+          # Optional. Default is $GITHUB_WORKSPACE
+          path: "app"
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # Deploy web app using Azure credentials
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ inputs.web-app-name }}
+          package: app
+          slot-name: ${{ inputs.slot_name }}
+      # Azure logout
+      - name: logout
+        run: |
+          az logout

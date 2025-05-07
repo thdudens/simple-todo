@@ -9,8 +9,7 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  AZURE_WEBAPP_NAME: simple-todo-test   # Set this to your application's name
+env:  
   AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'      # Set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '19.x'                # Set this to the node version to use
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
@@ -32,26 +31,22 @@ jobs:
       with:
        name: 'app'
        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-     
-  deploy:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/download-artifact@v4
-      with:        
-        name: app    
-        # Destination path. Supports basic tilde expansion.
-        # Optional. Default is $GITHUB_WORKSPACE
-        path: 'app'
-    - uses: azure/login@v2
-      with:
-       creds: ${{ secrets.AZURE_CREDENTIALS }}
-    # Deploy web app using Azure credentials
-    - uses: azure/webapps-deploy@v3
-      with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: app
-    # Azure logout 
-    - name: logout
-      run: |
-        az logout
+  
+  deploy-test:
+    uses: ./.github/workflows/deploy_azure.yml
+    needs: [build]    
+    with:
+      artifact-name: 'app'
+      web-app-name: 'simple-todo-test'
+      slot-name: 'production'
+    secrets: inherit
+  
+  deploy-stage:
+    uses: ./.github/workflows/deploy_azure.yml
+    needs: [build]    
+    with:
+      artifact-name: 'app'
+      web-app-name: 'simple-todo'
+      slot-name: 'stage'
+    secrets: inherit
+
