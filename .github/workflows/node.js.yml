@@ -38,7 +38,7 @@ jobs:
     with:
       artifact-name: 'app'
       web-app-name: 'simple-todo-test'
-      environment-name: 'Test'
+      environment-name: 'Development'
       slot-name: 'production'
     secrets: inherit
   
@@ -52,3 +52,18 @@ jobs:
       environment-name: 'Staging'
     secrets: inherit
 
+  release-to-prod:
+    name: Release to prod
+    needs: deploy-stage
+    runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+      url: 'https://${{ env.WEBAPP_NAME }}.azurewebsites.net/'
+
+    steps:    
+    - uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Swap slots
+      run: az webapp deployment slot swap -s stage -n simple-todo -g ASE-2
