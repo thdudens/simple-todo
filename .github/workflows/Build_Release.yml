@@ -16,9 +16,9 @@ jobs:
   build-app:
     uses: ./.github/workflows/build.yml
     with:
-      node-version: '19.x'
-      build-folder: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
-      artifact-name: '${{ env.ARTEFACT_NAME }}'
+      node-version: ${{ env.NODE_VERSION }}
+      build-folder: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      artifact-name: ${{ env.ARTEFACT_NAME }}
 
   deploy-staging:
     uses: ./.github/workflows/deploy_azure.yml
