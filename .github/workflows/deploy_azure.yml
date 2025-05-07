@@ -2,6 +2,9 @@ name: deploy to azure app service
 on:
   workflow_call:
     inputs:
+      environment-name:
+        required: true
+        type: string
       artifact-name:
         required: true
         type: string
@@ -14,7 +17,11 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest    
+    name: Deploy to ${{ inputs.environment-name }}
+    runs-on: ubuntu-latest 
+    environment:
+      name: '${{ inputs.environment-name }}'
+      url: ${{ steps.deploy.outputs.webapp-url }}   
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -30,7 +37,7 @@ jobs:
         with:
           app-name: ${{ inputs.web-app-name }}
           package: app
-          slot-name: ${{ inputs.slot_name }}
+          slot-name: ${{ inputs.slot-name }}
       # Azure logout
       - name: logout
         run: |

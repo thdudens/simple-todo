@@ -38,6 +38,7 @@ jobs:
     with:
       artifact-name: 'app'
       web-app-name: 'simple-todo-test'
+      environment-name: 'Test'
       slot-name: 'production'
     secrets: inherit
   
@@ -48,5 +49,6 @@ jobs:
       artifact-name: 'app'
       web-app-name: 'simple-todo'
       slot-name: 'stage'
+      environment-name: 'Staging'
     secrets: inherit
 
