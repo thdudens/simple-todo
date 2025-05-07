@@ -45,10 +45,7 @@ jobs:
   set-routing:
     name: Set Routing for staging slot
     needs: deploy-staging
-    runs-on: ubuntu-latest
-    environment:
-      name: 'Staging'
-      url: 'https://${{ env.WEBAPP_NAME }}.azurewebsites.net/'
+    runs-on: ubuntu-latest    
     steps:    
     - uses: azure/login@v2
       with:
@@ -59,7 +56,7 @@ jobs:
 
   release-to-prod:
     name: Release to prod
-    needs: deploy-staging
+    needs: set-routing
     runs-on: ubuntu-latest
     environment:
       name: 'Production'
