@@ -28,15 +28,15 @@ jobs:
     needs: [get-env-vars]
     uses: ./.github/workflows/build.yml
     with:
-      node-version: '${{ needs.get-env.outputs.NODE_VERSION }}'
-      build-folder: '${{ needs.get-env.outputs.AZURE_WEBAPP_PACKAGE_PATH }}'
-      artifact-name: '${{ needs.get-env.outputs.ARTEFACT_NAME }}'
+      node-version: '${{ needs.get-env-vars.outputs.NODE_VERSION }}'
+      build-folder: '${{ needs.get-env-vars.outputs.AZURE_WEBAPP_PACKAGE_PATH }}'
+      artifact-name: '${{ needs.get-env-vars.outputs.ARTEFACT_NAME }}'
   deploy-develop:
     uses: ./.github/workflows/deploy_azure.yml
     needs: [build-app,get-env-vars]    
     with:
-      artifact-name: '${{ needs.get-env.outputs.ARTEFACT_NAME }}'
-      web-app-name: '${{ needs.get-env.outputs.WEBAPP_NAME }}'
+      artifact-name: '${{ needs.get-env-vars.outputs.ARTEFACT_NAME }}'
+      web-app-name: '${{ needs.get-env-vars.outputs.WEBAPP_NAME }}'
       environment-name: 'Development'
       slot-name: 'production'
     secrets: inherit

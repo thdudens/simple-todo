@@ -11,6 +11,7 @@ env:
   AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'      # Set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '19.x'                # Set this to the node version to use
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
+  ARTEFACT_NAME: todo-app
 
 jobs:
   get-env-vars: # ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
@@ -27,6 +28,6 @@ jobs:
     needs: [get-env-vars]
     uses: ./.github/workflows/build.yml
     with:      
-      node-version: '${{ needs.get-env.outputs.NODE_VERSION }}'
-      build-folder: '${{ needs.get-env.outputs.AZURE_WEBAPP_PACKAGE_PATH }}'
-      artifact-name: '${{ needs.get-env.outputs.ARTEFACT_NAME }}'
+      node-version: '${{ needs.get-env-vars.outputs.NODE_VERSION }}'
+      build-folder: '${{ needs.get-env-vars.outputs.AZURE_WEBAPP_PACKAGE_PATH }}'
+      artifact-name: '${{ needs.get-env-vars.outputs.ARTEFACT_NAME }}'
