@@ -13,9 +13,20 @@ env:
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
 
 jobs:
+  get-env-vars: # ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+    name: Get Environment vars
+    runs-on: ubuntu-latest
+    outputs:
+      AZURE_WEBAPP_PACKAGE_PATH: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      WEBAPP_NAME: ${{ env.WEBAPP_NAME }}
+      NODE_VERSION: ${{ env.NODE_VERSION }}
+      ARTEFACT_NAME: ${{ env.ARTEFACT_NAME }}
+    steps:
+      - run: echo "null"
   build-app:
+    needs: [get-env-vars]
     uses: ./.github/workflows/build.yml
-    with:
-      node-version: '19.x'
-      build-folder: 'dist/todoapp/browser'
-      artifact-name: 'todo-app'
+    with:      
+      node-version: '${{ needs.get-env.outputs.NODE_VERSION }}'
+      build-folder: '${{ needs.get-env.outputs.AZURE_WEBAPP_PACKAGE_PATH }}'
+      artifact-name: '${{ needs.get-env.outputs.ARTEFACT_NAME }}'

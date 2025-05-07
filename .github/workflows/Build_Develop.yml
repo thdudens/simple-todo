@@ -13,18 +13,30 @@ env:
   ARTEFACT_NAME: todo-app
 
 jobs:
+  get-env-vars: # ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+    name: Get Environment vars
+    runs-on: ubuntu-latest
+    outputs:
+      AZURE_WEBAPP_PACKAGE_PATH: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      WEBAPP_NAME: ${{ env.WEBAPP_NAME }}
+      NODE_VERSION: ${{ env.NODE_VERSION }}
+      ARTEFACT_NAME: ${{ env.ARTEFACT_NAME }}
+    steps:
+      - run: echo "null"
+  
   build-app:
+    needs: [get-env-vars]
     uses: ./.github/workflows/build.yml
     with:
-      node-version: '19.x'
-      build-folder: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
-      artifact-name: '${{ env.ARTEFACT_NAME }}'
+      node-version: '${{ needs.get-env.outputs.NODE_VERSION }}'
+      build-folder: '${{ needs.get-env.outputs.AZURE_WEBAPP_PACKAGE_PATH }}'
+      artifact-name: '${{ needs.get-env.outputs.ARTEFACT_NAME }}'
   deploy-develop:
     uses: ./.github/workflows/deploy_azure.yml
-    needs: [build-app]    
+    needs: [build-app,get-env-vars]    
     with:
-      artifact-name: '${{ env.ARTEFACT_NAME }}'
-      web-app-name: '${{ env.WEBAPP_NAME }}'
+      artifact-name: '${{ needs.get-env.outputs.ARTEFACT_NAME }}'
+      web-app-name: '${{ needs.get-env.outputs.WEBAPP_NAME }}'
       environment-name: 'Development'
       slot-name: 'production'
     secrets: inherit
