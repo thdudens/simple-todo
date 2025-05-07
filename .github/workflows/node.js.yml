@@ -43,7 +43,7 @@ jobs:
   
   deploy-stage:
     uses: ./.github/workflows/deploy_azure.yml
-    needs: [build]    
+    needs: [deploy-test]    
     with:
       artifact-name: 'app'
       web-app-name: 'simple-todo'
