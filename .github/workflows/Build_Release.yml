@@ -1,19 +1,27 @@
-
+# Deploys the application to the production
+# - Build & Test
+# - Upload Artifacts
+# - Deploy artifacts to stage-slot 
+# - Set traffic to 50/50
+# - Swap slots
 name: Build and deploy to staging/production
 
+# Only trigger on pushes (merges) to main branch
 on:
   push:
     branches: [ "main" ]
 
 env:  
-  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'      # Set this to the path to your web app project, defaults to the repository root
-  WEBAPP_NAME: 'simple-todo'
-  NODE_VERSION: '19.x'                # Set this to the node version to use
+  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'  # build output folder
+  WEBAPP_NAME: 'simple-todo' # name of the target app service in azure
+  NODE_VERSION: '19.x'
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
   ARTEFACT_NAME: todo-app
 
 jobs:
-  get-env-vars: # ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+  # Ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+  # Converts all env variables to output variables of this job which can then be used for reusable workflow parameters
+  get-env-vars: 
     name: Get Environment vars
     runs-on: ubuntu-latest
     outputs:
@@ -24,6 +32,7 @@ jobs:
     steps:
       - run: echo "null"
 
+  # Call the build workflow
   build-app:
     needs: [get-env-vars]
     uses: ./.github/workflows/build.yml
@@ -32,6 +41,7 @@ jobs:
       build-folder: ${{ needs.get-env-vars.outputs.AZURE_WEBAPP_PACKAGE_PATH }}
       artifact-name: ${{ needs.get-env-vars.outputs.ARTEFACT_NAME }}
 
+  # Deploy to the stage slot of the production app service
   deploy-staging:
     uses: ./.github/workflows/deploy_azure.yml
     needs: [build-app,get-env-vars]    
@@ -42,6 +52,7 @@ jobs:
       environment-name: 'Staging'
     secrets: inherit
 
+  # Set routing to 50/50
   set-routing:
     name: Set Routing for staging slot
     needs: deploy-staging
@@ -54,6 +65,7 @@ jobs:
     - name: Set traffic for stage slot
       run: az webapp traffic-routing set --distribution stage=50 --name ${{ env.WEBAPP_NAME }} --resource-group ASE-2
 
+  # Swap stage slot with production slot
   release-to-prod:
     name: Release to prod
     needs: set-routing
@@ -66,6 +78,5 @@ jobs:
     - uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
     - name: Swap slots
       run: az webapp deployment slot swap -s stage -n simple-todo -g ASE-2

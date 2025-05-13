@@ -1,19 +1,26 @@
+# Deploys the application to the test environment
+# - Build & Test
+# - Upload Artifacts
+# - Deploy artifacts to development environment
 
 name: Build and deploy to development environment
 
+# only run on pushes (merges) to the development branch
 on:
   push:
     branches: [ "development" ]
 
 env:  
-  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'      # Set this to the path to your web app project, defaults to the repository root
-  WEBAPP_NAME: 'simple-todo-test'
-  NODE_VERSION: '19.x'                # Set this to the node version to use
+  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser' # build output folder
+  WEBAPP_NAME: 'simple-todo-test' # name of the target app service in azure
+  NODE_VERSION: '19.x' 
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
   ARTEFACT_NAME: todo-app
 
 jobs:
-  get-env-vars: # ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+  # Ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+  # Converts all env variables to output variables of this job which can then be used for reusable workflow parameters
+  get-env-vars: 
     name: Get Environment vars
     runs-on: ubuntu-latest
     outputs:
@@ -24,6 +31,7 @@ jobs:
     steps:
       - run: echo "null"
   
+  # Call the build workflow
   build-app:
     needs: [get-env-vars]
     uses: ./.github/workflows/build.yml
@@ -31,6 +39,8 @@ jobs:
       node-version: '${{ needs.get-env-vars.outputs.NODE_VERSION }}'
       build-folder: '${{ needs.get-env-vars.outputs.AZURE_WEBAPP_PACKAGE_PATH }}'
       artifact-name: '${{ needs.get-env-vars.outputs.ARTEFACT_NAME }}'
+  
+  # Deploy the build artifacts to azure app service
   deploy-develop:
     uses: ./.github/workflows/deploy_azure.yml
     needs: [build-app,get-env-vars]    
@@ -38,5 +48,5 @@ jobs:
       artifact-name: '${{ needs.get-env-vars.outputs.ARTEFACT_NAME }}'
       web-app-name: '${{ needs.get-env-vars.outputs.WEBAPP_NAME }}'
       environment-name: 'Development'
-      slot-name: 'production'
+      slot-name: 'production' # technically not needed here, as 'production' is default.
     secrets: inherit

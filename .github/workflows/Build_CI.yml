@@ -1,6 +1,7 @@
-
+# Builds the application and runs unit tests
 name: Generic Build
 
+# Trigger on each push to a feature-branch, and on every created pull request
 on:
   push:
     branches: [ "feature/**" ]
@@ -8,13 +9,15 @@ on:
     branches: [ "*" ]
 
 env:  
-  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser'      # Set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '19.x'                # Set this to the node version to use
+  AZURE_WEBAPP_PACKAGE_PATH: 'dist/todoapp/browser' # build output folder
+  NODE_VERSION: '19.x'   
   CI: true # According to https://github.com/orgs/community/discussions/25250, might be needed so npm test does not hang
-  ARTEFACT_NAME: todo-app
+  ARTEFACT_NAME: todo-app # name of the artifact which is uploaded to the pipeline
 
 jobs:
-  get-env-vars: # ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+  # Ugly workaround because there is a bug that env.XY can not be used in reusable workflow parameters. see https://github.com/actions/runner/issues/2372#issuecomment-1591370444
+  # Converts all env variables to output variables of this job which can then be used for reusable workflow parameters
+  get-env-vars: 
     name: Get Environment vars
     runs-on: ubuntu-latest
     outputs:
@@ -24,6 +27,7 @@ jobs:
       ARTEFACT_NAME: ${{ env.ARTEFACT_NAME }}
     steps:
       - run: echo "null"
+  # Build application and run unit tests
   build-app:
     needs: [get-env-vars]
     uses: ./.github/workflows/build.yml
